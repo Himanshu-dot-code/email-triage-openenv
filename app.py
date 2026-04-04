@@ -6,13 +6,24 @@ app = FastAPI()
 env = EmailTriageEnv()
 
 
-@app.api_route("/reset", methods=["GET", "POST"])
+@app.get("/")
+def root():
+    return {"status": "Email Triage OpenEnv running"}
+
+
+@app.post("/reset")
 def reset():
+    obs = env.reset()
+    return obs.model_dump()
 
-    observation = env.reset()
 
+@app.post("/step")
+def step(action: dict):
+    action_obj = type("Action", (), action)
+    obs, reward, done, info = env.step(action_obj)
     return {
-        "subject": observation.subject,
-        "body": observation.body,
-        "sender_type": observation.sender_type
+        "observation": obs.model_dump(),
+        "reward": reward,
+        "done": done,
+        "info": info,
     }
