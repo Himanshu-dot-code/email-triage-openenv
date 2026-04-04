@@ -1,0 +1,122 @@
+[
+  {
+    "subject": "Meeting tomorrow",
+    "body": "Please confirm availability ASAP",
+    "sender_type": "manager",
+    "category": "meeting",
+    "priority": "high",
+    "spam": false
+  },
+  {
+    "subject": "Weekly project update",
+    "body": "Sharing progress from this week",
+    "sender_type": "colleague",
+    "category": "update",
+    "priority": "medium",
+    "spam": false
+  },
+  {
+    "subject": "Account security alert",
+    "body": "Suspicious login detected",
+    "sender_type": "external",
+    "category": "work",
+    "priority": "high",
+    "spam": false
+  },
+  {
+    "subject": "Free vacation offer",
+    "body": "Click here to claim reward",
+    "sender_type": "unknown",
+    "category": "spam",
+    "priority": "low",
+    "spam": true
+  },
+  {
+    "subject": "Code review reminder",
+    "body": "Review PR before deadline",
+    "sender_type": "manager",
+    "category": "work",
+    "priority": "high",
+    "spam": false
+  },
+  {
+    "subject": "Lunch plan today",
+    "body": "Shall we go out for lunch?",
+    "sender_type": "colleague",
+    "category": "update",
+    "priority": "low",
+    "spam": false
+  },
+  {
+    "subject": "Password reset required",
+    "body": "Reset your password immediately",
+    "sender_type": "external",
+    "category": "work",
+    "priority": "high",
+    "spam": false
+  },
+  {
+    "subject": "Win a free iPhone",
+    "body": "Limited time offer click now",
+    "sender_type": "unknown",
+    "category": "spam",
+    "priority": "low",
+    "spam": true
+  },
+  {
+    "subject": "Sprint planning meeting",
+    "body": "Join planning call at 10 AM",
+    "sender_type": "manager",
+    "category": "meeting",
+    "priority": "high",
+    "spam": false
+  },
+  {
+    "subject": "Server maintenance notice",
+    "body": "Downtime scheduled tonight",
+    "sender_type": "external",
+    "category": "update",
+    "priority": "medium",
+    "spam": false
+  },
+  {
+    "subject": "Project deadline extension",
+    "body": "Deadline moved by two days",
+    "sender_type": "manager",
+    "category": "work",
+    "priority": "medium",
+    "spam": false
+  },
+  {
+    "subject": "Weekly newsletter",
+    "body": "Latest company updates inside",
+    "sender_type": "external",
+    "category": "update",
+    "priority": "low",
+    "spam": false
+  },
+  {
+    "subject": "Bonus announcement",
+    "body": "Performance bonuses released",
+    "sender_type": "manager",
+    "category": "update",
+    "priority": "medium",
+    "spam": false
+  },
+  {
+    "subject": "Security training reminder",
+    "body": "Complete mandatory training",
+    "sender_type": "manager",
+    "category": "work",
+    "priority": "high",
+    "spam": false
+  },
+  {
+    "subject": "Cheap crypto investment",
+    "body": "Guaranteed profit opportunity",
+    "sender_type": "unknown",
+    "category": "spam",
+    "priority": "low",
+    "spam": true
+  }
+]
