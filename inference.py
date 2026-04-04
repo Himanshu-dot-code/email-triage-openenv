@@ -1,6 +1,12 @@
-import json
+import os
 from env.environment import EmailTriageEnv
 from env.grader import EmailTriageGrader
+
+
+# Required environment variables (hackathon spec)
+API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
+MODEL_NAME = os.getenv("MODEL_NAME", "heuristic-agent")
+HF_TOKEN = os.getenv("HF_TOKEN")
 
 
 TASKS = ["task_easy", "task_medium", "task_hard"]
@@ -46,7 +52,7 @@ def run_task(task_name):
 
     obs = env.reset()
 
-    print(f"[START] task={task_name} env=email-triage model=heuristic-agent")
+    print(f"[START] task={task_name} env=email-triage model={MODEL_NAME}")
 
     rewards = []
     step = 0
