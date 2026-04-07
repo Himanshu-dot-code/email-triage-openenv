@@ -1,54 +1,66 @@
 import os
+from openai import OpenAI
+
 from env.environment import EmailTriageEnv
-from env.grader import EmailTriageGrader
 
 
-# Required environment variables (hackathon spec)
-API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
-MODEL_NAME = os.getenv("MODEL_NAME", "heuristic-agent")
-HF_TOKEN = os.getenv("HF_TOKEN")
+# REQUIRED: use hackathon proxy variables
+client = OpenAI(
+    base_url=os.environ["API_BASE_URL"],
+    api_key=os.environ["API_KEY"]
+)
+
+MODEL_NAME = os.getenv("MODEL_NAME")
 
 
 TASKS = ["task_easy", "task_medium", "task_hard"]
 
 
-def heuristic_agent(obs):
+def llm_agent(obs):
 
-    subject = obs.subject.lower()
-    body = obs.body.lower()
+    prompt = f"""
+You are an enterprise email assistant.
 
-    category = "update"
-    priority = "medium"
-    spam = False
+Classify the email into:
+category (meeting/work/update/spam)
+priority (high/medium/low)
+spam (true/false)
 
-    if "meeting" in subject or "meeting" in body:
-        category = "meeting"
-        priority = "high"
+Email:
+Subject: {obs.subject}
+Body: {obs.body}
+Sender type: {obs.sender_type}
 
-    elif "security" in subject or "password" in subject:
-        category = "work"
-        priority = "high"
+Return JSON only.
+"""
 
-    elif "free" in subject or "offer" in subject:
-        category = "spam"
-        priority = "low"
-        spam = True
+    response = client.chat.completions.create(
+        model=MODEL_NAME,
+        messages=[
+            {"role": "system", "content": "Return structured JSON."},
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0
+    )
 
-    elif "deadline" in subject or "review" in subject:
-        category = "work"
-        priority = "high"
+    text = response.choices[0].message.content
 
-    return {
-        "category": category,
-        "priority": priority,
-        "spam": spam
-    }
+    try:
+        import json
+        action = json.loads(text)
+    except Exception:
+        action = {
+            "category": "update",
+            "priority": "medium",
+            "spam": False
+        }
+
+    return action
 
 
 def run_task(task_name):
 
     env = EmailTriageEnv()
-    grader = EmailTriageGrader(task_name)
 
     obs = env.reset()
 
@@ -61,7 +73,7 @@ def run_task(task_name):
 
         step += 1
 
-        action_dict = heuristic_agent(obs)
+        action_dict = llm_agent(obs)
 
         action = type("Action", (), action_dict)
 
