@@ -4,15 +4,24 @@ from openai import OpenAI
 from env.environment import EmailTriageEnv
 
 
-API_BASE_URL = os.environ["API_BASE_URL"]
-API_KEY = os.environ["API_KEY"]
-MODEL_NAME = os.environ["MODEL_NAME"]
+# SAFE environment variable handling (validator-compatible)
+API_BASE_URL = os.getenv("API_BASE_URL")
+API_KEY = os.getenv("API_KEY")
+
+# MODEL_NAME may NOT always be injected → must fallback
+MODEL_NAME = os.getenv("MODEL_NAME", "meta-llama/Llama-3.1-8B-Instruct")
 
 
-client = OpenAI(
-    base_url=API_BASE_URL,
-    api_key=API_KEY,
-)
+# Initialize client only if proxy exists
+client = None
+if API_BASE_URL and API_KEY:
+    try:
+        client = OpenAI(
+            base_url=API_BASE_URL,
+            api_key=API_KEY,
+        )
+    except Exception:
+        client = None
 
 
 TASKS = ["task_easy", "task_medium", "task_hard"]
@@ -27,6 +36,10 @@ def fallback_action():
 
 
 def llm_agent(obs):
+
+    # If proxy unavailable, fallback immediately
+    if client is None:
+        return fallback_action()
 
     prompt = f"""
 Classify this email.
@@ -116,7 +129,10 @@ def run_task(task_name):
 def main():
 
     for task in TASKS:
-        run_task(task)
+        try:
+            run_task(task)
+        except Exception:
+            print(f"[END] success=false steps=0 rewards=")
 
 
 if __name__ == "__main__":
