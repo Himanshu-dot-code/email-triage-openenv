@@ -32,4 +32,13 @@ class EmailTriageGrader:
             if prediction.get(field) == ground_truth.get(field):
                 earned_weight += weight
 
-        return earned_weight / total_weight
+        score = earned_weight / total_weight
+
+        # REQUIRED by validator: score must be strictly between (0,1)
+        if score <= 0:
+            score = 0.01
+
+        elif score >= 1:
+            score = 0.99
+
+        return score
