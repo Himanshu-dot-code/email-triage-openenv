@@ -1,27 +1,37 @@
 import os
+import json
 from openai import OpenAI
-
 from env.environment import EmailTriageEnv
 
 
-# REQUIRED: use hackathon proxy variables
-client = OpenAI(
-    base_url=os.environ["API_BASE_URL"],
-    api_key=os.environ["API_KEY"]
-)
+API_BASE_URL = os.environ["API_BASE_URL"]
+API_KEY = os.environ["API_KEY"]
+MODEL_NAME = os.environ["MODEL_NAME"]
 
-MODEL_NAME = os.getenv("MODEL_NAME")
+
+client = OpenAI(
+    base_url=API_BASE_URL,
+    api_key=API_KEY,
+)
 
 
 TASKS = ["task_easy", "task_medium", "task_hard"]
 
 
+def fallback_action():
+    return {
+        "category": "update",
+        "priority": "medium",
+        "spam": False,
+    }
+
+
 def llm_agent(obs):
 
     prompt = f"""
-You are an enterprise email assistant.
+Classify this email.
 
-Classify the email into:
+Return JSON with:
 category (meeting/work/update/spam)
 priority (high/medium/low)
 spam (true/false)
@@ -29,33 +39,31 @@ spam (true/false)
 Email:
 Subject: {obs.subject}
 Body: {obs.body}
-Sender type: {obs.sender_type}
-
-Return JSON only.
+Sender: {obs.sender_type}
 """
 
-    response = client.chat.completions.create(
-        model=MODEL_NAME,
-        messages=[
-            {"role": "system", "content": "Return structured JSON."},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0
-    )
-
-    text = response.choices[0].message.content
-
     try:
-        import json
-        action = json.loads(text)
-    except Exception:
-        action = {
-            "category": "update",
-            "priority": "medium",
-            "spam": False
-        }
 
-    return action
+        response = client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=[
+                {"role": "system", "content": "Return JSON only."},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0,
+        )
+
+        text = response.choices[0].message.content
+
+        action = json.loads(text)
+
+        if not isinstance(action, dict):
+            return fallback_action()
+
+        return action
+
+    except Exception:
+        return fallback_action()
 
 
 def run_task(task_name):
@@ -73,11 +81,17 @@ def run_task(task_name):
 
         step += 1
 
-        action_dict = llm_agent(obs)
+        try:
+            action_dict = llm_agent(obs)
+        except Exception:
+            action_dict = fallback_action()
 
         action = type("Action", (), action_dict)
 
-        next_obs, reward, done, _ = env.step(action)
+        try:
+            next_obs, reward, done, _ = env.step(action)
+        except Exception:
+            break
 
         rewards.append(reward)
 
